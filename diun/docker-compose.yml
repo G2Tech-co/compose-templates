@@ -1,0 +1,29 @@
+services:
+  diun:
+    image: crazymax/diun:4.25
+    container_name: diun
+    restart: always
+    command: serve
+    volumes:
+      - "./data:/data"
+      # You may need use `docker login`
+      - "/root/.docker/config.json:/root/.docker/config.json:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - "TZ=Asia/Tehran"
+      - "LOG_LEVEL=debug"
+      - "LOG_JSON=false"
+
+      - "DIUN_WATCH_WORKERS=2"
+      - "DIUN_WATCH_SCHEDULE=0 */6 * * *"
+      - "DIUN_WATCH_JITTER=30s"
+      - "DIUN_WATCH_FIRSTCHECKNOTIF=true"
+
+      - "DIUN_NOTIF_TELEGRAM_TOKEN=TOKEN"
+      - "DIUN_NOTIF_TELEGRAM_CHATIDS=ID"
+      - "DIUN_NOTIF_TELEGRAM_TEMPLATEBODY=Docker tag {{ if .Entry.Image.HubLink }}[{{ .Entry.Image }}]({{ .Entry.Image.HubLink }}){{ else }}{{ .Entry.Image }}{{ end }} which you subscribed to through {{ .Entry.Provider }} provider has been {{ if (eq .Entry.Status \"new\") }}newly added{{ else }}updated{{ end }} on {{ escapeMarkdown .Meta.Hostname }}."
+
+      - "DIUN_PROVIDERS_DOCKER=true"
+      - "DIUN_PROVIDERS_DOCKER_WATCHBYDEFAULT=false"
+    labels:
+      - "diun.enable=true"
