@@ -1,16 +1,16 @@
 services:
   dozzle:
-    image: amir20/dozzle:latest
+    image: amir20/dozzle:v6.4.2
     container_name: dozzle
     environment:
-      - "DOZZLE_USERNAME=admin"
-      - "DOZZLE_PASSWORD=admin"
-      # - "DOZZLE_FILTER=name=redis"
+      - "DOZZLE_AUTH_PROVIDER=simple"
+      - "DOZZLE_FILTER=name=slow_query"
       - "DOZZLE_BASE=/dozzle"
+      - "DOZZLE_ENABLE_ACTIONS=false"
       - "DOZZLE_NO_ANALYTICS=true"
-      - "DOZZLE_ADDR=:8081"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./users.yml:/data/users.yml
     networks:
       - lan
     labels:
@@ -20,13 +20,25 @@ services:
       - "traefik.http.routers.dozzle.rule=Host(`example.co`)"
       - "traefik.http.routers.dozzle.tls=true"
       - "traefik.http.routers.dozzle.tls.certresolver=letsenc"
-      - "traefik.http.services.dozzle.loadbalancer.server.port=8081"
-    healthcheck:
-      test: [ "CMD", "/dozzle", "healthcheck" ]
-      interval: 3s
-      timeout: 30s
-      retries: 5
-      start_period: 30s
+      - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
+    # healthcheck:
+    #   test: [ "CMD", "/dozzle", "healthcheck" ]
+    #   interval: 3s
+    #   timeout: 30s
+    #   retries: 5
+    #   start_period: 30s
+
+  slow_query:
+    image: alpine:3.19.1
+    container_name: slow_query
+    restart: unless-stopped
+    network_mode: none
+    volumes:
+      - /var/log/system.log:/var/log/stream.log
+    command:
+      - tail
+      - -f
+      - /var/log/stream.log
 
 networks:
   lan:
