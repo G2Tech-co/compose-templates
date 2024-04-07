@@ -46,6 +46,7 @@ services:
     volumes:
       - ./slow_query.log:/var/log/stream.log
     command:
+      # - tail -n 200 /var/log/stream.log > /var/log/stream.log.tmp && mv /var/log/stream.log.tmp /var/log/stream.log
       - tail
       - -f
       - /var/log/stream.log
